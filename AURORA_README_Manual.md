@@ -234,7 +234,7 @@ bash p4/compile.sh
 | Mininet-WiFi failure | Check Linux environment, dependencies, and required privileges |
 | Inconsistent results | Verify data splits, seeds, configurations, and software versions |
 
-## 10. Citation, license, and contact
+## 10. Citation
 
 **Paper:** *AURORA: Operations Intelligence for Risk-Aware Federated Learning and Adaptive Decision-Making in UAV-Assisted Transportation Systems*  
 **Journal:** *Journal of Operations Intelligence*    
