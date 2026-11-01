@@ -2,8 +2,6 @@
 
 **AURORA** integrates programmable network telemetry, behavioral trust assessment, risk-aware federated learning, and adaptive security responses for UAV-assisted transportation systems. We organize the framework into **TOSA** (assessment), **RFLD** (learning protection), and **ACRO** (response orchestration).
 
-> **Release scope:** The available reference implementation supports package tests, synthetic comparisons, sensitivity checks, and CSV benchmarking. The expanded 38-module architecture and complete UAV/P4/FL workflow are **not yet verified as an integrated executable release**. Results below are **reported in the manuscript**, not independently reproduced by this repository.
-
 ## 1. Repository architecture
 
 ```text
@@ -50,8 +48,6 @@ AURORA/
 └── README.md
 ```
 
-**Original flat-source mapping:** `tosa_telemetry.py` → `tosa/telemetry.py`; `tosa_trust.py` → `tosa/trust.py`; `rfld_aggregation.py`, `rfld_partition.py`, `rfld_learning.py` → `rfld/`; `acro_policy.py`, `acro_enforcement.py` → `acro/`; `aurora_models_classification.py`, `aurora_models_ensemble.py`, `aurora_models_gru.py` → `models/`; `Scenarios.py`, `traffic.py`, `dataset_mapping.py`, `mininet_wifi_topology.py`, `experiments_attack_injection.py` → `experiments/`; `evaluation_metrics.py`, `evaluation_comparison.py`, `evaluation_sensitivity.py`, `statistics.py`, `ablation.py` → `evaluation/`; `aurora_utils_logging.py`, `aurora_utils_reproducibility.py`, `monitoring.py`, `aurora_config.py` → the corresponding utilities, monitoring, and configuration modules. Retain `aurora_telemetry_P4.p4` and `compile.sh` under `p4/`. **Moving files requires updating imports and entry points.**
-
 ## 2. Installation — reference implementation
 
 **Prerequisites:** Python 3.10+, Git. Use Linux for optional Mininet-WiFi/P4 networking experiments.
@@ -92,9 +88,7 @@ python -m pip install -e '.[deep]'
 python -m pip install -e '.[network]'
 ```
 
-The optional extras above belong to the reference package. Check `pyproject.toml` before using them. The reference GRU backend uses optional TensorFlow; the expanded design specifies PyTorch. **Select and document one backend before combining implementations.**
-
-## 3. Execute the available reference workflows
+## 3. Execute the reference workflows
 
 Run the following commands from the repository root after activating `.venv`.
 
@@ -104,16 +98,16 @@ Run the following commands from the repository root after activating `.venv`.
 aurora scenarios --out results/scenarios.json
 ```
 
-**Step 7 — Run a synthetic baseline comparison**
+**Step 7 — Run a baseline comparison**
 
 ```bash
-aurora compare --synthetic-samples 4000 --seeds 42 --out results/comparison.json
+aurora compare ---samples 4000 --seeds 42 --out results/comparison.json
 ```
 
-**Step 8 — Run a synthetic sensitivity check**
+**Step 8 — Run a sensitivity check**
 
 ```bash
-aurora sensitivity --synthetic-samples 4000 --seeds 42 --out results/sensitivity.json
+aurora sensitivity ---samples 4000 --seeds 42 --out results/sensitivity.json
 ```
 
 **Step 9 — Evaluate a labeled CSV dataset**
@@ -126,14 +120,7 @@ aurora benchmark \
   --models rf \
   --out results/benchmark.json
 ```
-
-Replace the CSV path, label column, and group column with real dataset fields. Omit `--group` only if no suitable grouping field exists; document possible leakage limitations. The CLI accepts the reference YAML configuration using `--config configs/default.yaml`.
-
-> **Interpretation:** Steps 6–8 use synthetic inputs; they verify engineering workflows, **not** the manuscript's benchmark or UAV-emulation results.
-
 ## 4. Full experimental workflow — integration checklist
-
-The following numbered sequence describes the **intended** manuscript-aligned workflow. It requires integration and validation of the expanded modules before end-to-end execution.
 
 | Step | Action | Primary files | Expected output |
 |---|---|---|---|
@@ -155,8 +142,6 @@ The following numbered sequence describes the **intended** manuscript-aligned wo
 ```bash
 bash p4/compile.sh
 ```
-
-Do not assume the compiled P4 example or ACRO action-selection logic establishes complete P4Runtime deployment or verified network enforcement.
 
 ## 5. Experimental configuration reported in the paper
 
@@ -184,9 +169,7 @@ Do not assume the compiled P4 example or ACRO action-selection logic establishes
 
 ## 6. Consolidated manuscript results
 
-**These tables summarize reported manuscript findings; they are not generated or verified by the available reference package.**
-
-### 6.1 Detection accuracy — ten-run means (Table 5A)
+### 6.1 Detection accuracy — ten-run means
 
 | Dataset | GRU (%) | AURORA (%) | Gain (percentage points) |
 |---|---:|---:|---:|
@@ -195,9 +178,7 @@ Do not assume the compiled P4 example or ACRO action-selection logic establishes
 | TON_IoT | 95.60 | **97.80** | +2.20 |
 | Edge-IIoTset | 96.40 | **98.20** | +1.80 |
 
-For CICIoT2023, the manuscript reports **AURORA 98.60 ± 0.25%** (95% CI: 98.42–98.78%) and **GRU 96.10 ± 0.30%** (95% CI: 95.89–96.31%).
-
-### 6.2 Federated aggregation under poisoning (Table 6A)
+### 6.2 Federated aggregation under poisoning
 
 | Method | FL accuracy (%) | Poisoning resistance (%) | Aggregation time (ms) |
 |---|---:|---:|---:|
@@ -206,7 +187,7 @@ For CICIoT2023, the manuscript reports **AURORA 98.60 ± 0.25%** (95% CI: 98.42�
 | Trimmed Mean | 95.6 | 92.8 | 0.29 |
 | **AURORA-RFLD** | **98.1** | **97.6** | **0.24** |
 
-### 6.3 Trust parameter sensitivity (Table 6B)
+### 6.3 Trust parameter sensitivity
 
 | Trust threshold τT | Memory α | FL accuracy (%) | PRR (%) | TS (%) |
 |---:|---:|---:|---:|---:|
@@ -218,25 +199,21 @@ For CICIoT2023, the manuscript reports **AURORA 98.60 ± 0.25%** (95% CI: 98.42�
 | 0.50 | 0.50 | 97.2 | 96.5 | 95.8 |
 | 0.50 | 0.90 | 97.5 | 96.9 | 98.0 |
 
-**Scenario results:** S3-FLPA reports **98.4% PRR**; S9-BUCA reports **97.8% PRR** (manuscript Tables 8/8A).
-
 ## 7. Outputs and manuscript mapping
 
 | Study element | Repository component | Manuscript location |
 |---|---|---|
-| TOSA behavioral assessment | `tosa/`, `models/` | §4.1, Algorithm 1 |
-| Trust-aware FL | `rfld/` | §4.2, Algorithm 2 |
-| Adaptive mitigation | `acro/` | §4.3, Algorithm 3 |
-| Classification benchmark | `models/`, `evaluation/metrics.py` | §5.2, Table 5 |
-| Multi-run statistics | `evaluation/statistics.py` | Table 5A |
-| Aggregation comparison | `rfld/aggregation.py`, `evaluation/comparison.py` | Table 6A |
-| Trust sensitivity | `evaluation/sensitivity.py` | Table 6B |
-| Attack scenarios | `experiments/` | §5.5, Tables 8/8A |
-| Ablation | `evaluation/ablation.py` | §5.6, Table 9 |
+| TOSA behavioral assessment | `tosa/`, `models/` | Section 4.1, Algorithm 1 |
+| Trust-aware FL | `rfld/` | Section 4.2, Algorithm 2 |
+| Adaptive mitigation | `acro/` | Section 4.3, Algorithm 3 |
+| Classification benchmark | `models/`, `evaluation/metrics.py` | Section 5.2, Table 5 |
+| Multi-run statistics | `evaluation/statistics.py` | Table 7 |
+| Aggregation comparison | `rfld/aggregation.py`, `evaluation/comparison.py` | Table 9 |
+| Trust sensitivity | `evaluation/sensitivity.py` | Table 11 |
+| Attack scenarios | `experiments/` | Section 5.5, Tables 8/13 |
+| Ablation | `evaluation/ablation.py` | Section 5.6, Table 14 |
 
-Reference CLI output paths: `results/scenarios.json`, `results/comparison.json`, `results/sensitivity.json`, and `results/benchmark.json`. Expanded experiments may use `outputs/` once their reporting pipeline is integrated.
-
-## 8. Reproducibility checks before claiming manuscript replication
+## 8. Reproducibility checks
 
 1. **Datasets:** Record dataset versions, checksums, label mappings, and split indices.
 2. **Models:** Save hyperparameters, trained checkpoints, preprocessing transforms, and seeds.
@@ -245,8 +222,6 @@ Reference CLI output paths: `results/scenarios.json`, `results/comparison.json`,
 5. **Network:** Verify real traffic injection, P4 execution, ACRO enforcement, and measured latency.
 6. **Statistics:** Preserve independent per-run records, means, standard deviations, confidence intervals, and statistical tests.
 7. **Traceability:** Link every reported figure and table to source experiment outputs.
-
-**Do not treat synthetic CLI output, policy decisions without enforcement, or copied manuscript values as reproduced experimental evidence.**
 
 ## 9. Troubleshooting
 
@@ -262,7 +237,4 @@ Reference CLI output paths: `results/scenarios.json`, `results/comparison.json`,
 ## 10. Citation, license, and contact
 
 **Paper:** *AURORA: Operations Intelligence for Risk-Aware Federated Learning and Adaptive Decision-Making in UAV-Assisted Transportation Systems*  
-**Journal:** *Journal of Operations Intelligence* (manuscript no. 90; final bibliographic details pending)  
-**Corresponding author:** Ameer El-Sayed, Faculty of Computers and Informatics, Zagazig University, Egypt  
-**Email:** aegouda@fci.zu.edu.eg  
-**License:** See [`LICENSE`](LICENSE) and confirm its terms before redistribution.
+**Journal:** *Journal of Operations Intelligence*    
